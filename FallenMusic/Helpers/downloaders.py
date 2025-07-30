@@ -1,48 +1,42 @@
 import asyncio
-import os
 import yt_dlp
-import tempfile
+import os
 
-async def audio_dl(url: str, title: str = "Unknown", video_id: str = None):
+async def audio_dl(url: str, file_name: str = "audio") -> str | None:
     """
-    Youtube'dan hızlı audio indirme (herkese açık ve çerezle erişilebilen videolar için).
+    YouTube'dan mp3 formatında ses dosyası indirir.
+    İndirilen dosyayı /tmp klasörüne kaydeder (Heroku uyumlu).
+    cookie dosyası aynı klasörde www.youtube.com_cookies.txt olarak beklenir.
     """
     try:
-        print(f"DEBUG: Starting audio download for URL: {url}")
+        temp_dir = "/tmp"  # Heroku'da yazılabilir temp dizini
+        output_path = os.path.join(temp_dir, f"{file_name}.%(ext)s")
 
-        # Temp dosya oluştur
-        with tempfile.NamedTemporaryFile(suffix='.mp3', delete=False) as temp_file:
-            temp_path = temp_file.name
-
-        # Çerez dosyası yolun (senin dosyanın adı: www.youtube.com_cookies.txt)
-        cookies_path = "www.youtube.com_cookies.txt"
-
-        # yt-dlp seçenekleri
         ydl_opts = {
-            'format': 'bestaudio[ext=m4a]/bestaudio/best',
-            'outtmpl': temp_path,
-            'extractaudio': True,
-            'audioformat': 'mp3',
-            'audioquality': '192',
-            'no_warnings': True,
+            'format': 'bestaudio/best',
+            'outtmpl': output_path,
             'quiet': True,
-            'no_playlist': True,
-            'cookiefile': cookies_path,  # Çerez dosyasını ekledik!
+            'no_warnings': True,
+            'cookiefile': os.path.join(os.path.dirname(__file__), "www.youtube.com_cookies.txt"),
+            'postprocessors': [{
+                'key': 'FFmpegExtractAudio',
+                'preferredcodec': 'mp3',
+                'preferredquality': '192',
+            }],
         }
 
+        loop = asyncio.get_event_loop()
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-            print(f"DEBUG: yt-dlp processing...")
-            await asyncio.get_event_loop().run_in_executor(
-                None, ydl.download, [url]
-            )
+            await loop.run_in_executor(None, ydl.download, [url])
 
-        if os.path.exists(temp_path):
-            print(f"DEBUG: ✅ Download successful: {temp_path}")
-            return temp_path
+        final_path = output_path.replace("%(ext)s", "mp3")
+        if os.path.exists(final_path):
+            print(f"✅ Download başarılı: {final_path}")
+            return final_path
         else:
-            print(f"DEBUG: ❌ Download failed - file not found")
+            print("❌ İndirilen dosya bulunamadı.")
             return None
 
     except Exception as e:
-        print(f"DEBUG: Download error: {e}")
+        print(f"🔴 İndirme hatası: {e}")
         return None
