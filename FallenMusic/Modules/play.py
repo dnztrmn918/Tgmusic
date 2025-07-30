@@ -175,7 +175,10 @@ async def play(_, message: Message):
             return await fallen.edit_text(
                 f"» sᴏʀʀʏ ʙᴀʙʏ, ᴛʀᴀᴄᴋ ʟᴏɴɢᴇʀ ᴛʜᴀɴ  {DURATION_LIMIT} ᴍɪɴᴜᴛᴇs ᴀʀᴇ ɴᴏᴛ ᴀʟʟᴏᴡᴇᴅ ᴛᴏ ᴘʟᴀʏ ᴏɴ {BOT_NAME}."
             )
-        file_path = audio_dl(url)
+        file_path = await audio_dl(url)
+        if file_path is None or not os.path.exists(file_path):
+            return await fallen.edit_text("Şarkı dosyası indirilemedi veya dosya bulunamadı. Lütfen tekrar deneyin.")
+
     else:
         if len(message.command) < 2:
             return await fallen.edit_text("» ᴡʜᴀᴛ ᴅᴏ ʏᴏᴜ ᴡᴀɴɴᴀ ᴘʟᴀʏ ʙᴀʙʏ ?")
@@ -201,7 +204,9 @@ async def play(_, message: Message):
             return await fallen.edit(
                 f"» sᴏʀʀʏ ʙᴀʙʏ, ᴛʀᴀᴄᴋ ʟᴏɴɢᴇʀ ᴛʜᴀɴ  {DURATION_LIMIT} ᴍɪɴᴜᴛᴇs ᴀʀᴇ ɴᴏᴛ ᴀʟʟᴏᴡᴇᴅ ᴛᴏ ᴘʟᴀʏ ᴏɴ {BOT_NAME}."
             )
-        file_path = audio_dl(url)
+        file_path = await audio_dl(url)
+        if file_path is None or not os.path.exists(file_path):
+            return await fallen.edit_text("Şarkı dosyası indirilemedi veya dosya bulunamadı. Lütfen tekrar deneyin.")
 
     try:
         videoid = videoid
