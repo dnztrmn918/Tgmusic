@@ -5,7 +5,7 @@ import tempfile
 
 async def audio_dl(url: str, title: str = "Unknown", video_id: str = None):
     """
-    Youtube'dan hızlı audio indirme (herkese açık videolar için).
+    Youtube'dan hızlı audio indirme (herkese açık ve çerezle erişilebilen videolar için).
     """
     try:
         print(f"DEBUG: Starting audio download for URL: {url}")
@@ -14,7 +14,10 @@ async def audio_dl(url: str, title: str = "Unknown", video_id: str = None):
         with tempfile.NamedTemporaryFile(suffix='.mp3', delete=False) as temp_file:
             temp_path = temp_file.name
 
-        # yt-dlp seçenekleri (cookies.txt yok!)
+        # Çerez dosyası yolun (senin dosyanın adı: www.youtube.com_cookies.txt)
+        cookies_path = "www.youtube.com_cookies.txt"
+
+        # yt-dlp seçenekleri
         ydl_opts = {
             'format': 'bestaudio[ext=m4a]/bestaudio/best',
             'outtmpl': temp_path,
@@ -24,6 +27,7 @@ async def audio_dl(url: str, title: str = "Unknown", video_id: str = None):
             'no_warnings': True,
             'quiet': True,
             'no_playlist': True,
+            'cookiefile': cookies_path,  # Çerez dosyasını ekledik!
         }
 
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
