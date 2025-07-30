@@ -1,16 +1,15 @@
 import os
 import yt_dlp
-import tempfile
 
 def audio_dl(url: str) -> str:
-    try:
-        # Geçici mp3 dosyası oluştur
-        with tempfile.NamedTemporaryFile(suffix='.mp3', delete=False) as temp_file:
-            temp_path = temp_file.name
+    download_folder = "downloads"
+    if not os.path.exists(download_folder):
+        os.makedirs(download_folder)
 
+    try:
         ydl_opts = {
             "format": "bestaudio[ext=m4a]/bestaudio/best",
-            "outtmpl": temp_path,
+            "outtmpl": os.path.join(download_folder, "%(id)s.%(ext)s"),
             "extractaudio": True,
             "audioformat": "mp3",
             "audioquality": "192",
@@ -20,11 +19,13 @@ def audio_dl(url: str) -> str:
         }
 
         ydl = yt_dlp.YoutubeDL(ydl_opts)
-        ydl.download([url])
+        info = ydl.extract_info(url, download=True)
+        file_path = os.path.join(download_folder, f"{info['id']}.mp3")
 
-        if os.path.exists(temp_path):
-            return temp_path
+        if os.path.exists(file_path):
+            return file_path
         else:
+            print("[ERROR] İndirilen dosya bulunamadı.")
             return None
 
     except Exception as e:
