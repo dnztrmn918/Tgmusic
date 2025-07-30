@@ -1,15 +1,11 @@
+from typing import Optional
 import asyncio
 import yt_dlp
 import os
 
-async def audio_dl(url: str, file_name: str = "audio") -> str | None:
-    """
-    YouTube'dan mp3 formatında ses dosyası indirir.
-    İndirilen dosyayı /tmp klasörüne kaydeder (Heroku uyumlu).
-    cookie dosyası aynı klasörde www.youtube.com_cookies.txt olarak beklenir.
-    """
+async def audio_dl(url: str, file_name: str = "audio") -> Optional[str]:
     try:
-        temp_dir = "/tmp"  # Heroku'da yazılabilir temp dizini
+        temp_dir = "/tmp"
         output_path = os.path.join(temp_dir, f"{file_name}.%(ext)s")
 
         ydl_opts = {
